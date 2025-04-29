@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        function handleSendBtnClick(){
+            fetch('/send_message', {
+                method: "POST",
+                body: document.querySelector('#message_text').value,
+            })
+            .then(response => response.json())
+            .then(data => {
+                let messagesList = document.getElementById('messages_list');
+                let newMessage = data[data.length - 1];
+                let newMessageEl = document.createElement('p');
+                messagesList.appendChild(newMessageEl);
+                newMessageEl.innerHTML = `<p class="message">${newMessage.body}</p>`;
+            })
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            const button = document.querySelector('#send_message_btn');
+            button.addEventListener('click', handleSendBtnClick);
+        });
+    </script>
+    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div class="chat_list_div">
+        <div class="search_chat">
+            <form action="/search_chat" method="POST">
+                <input type="text" name="chat_name">
+                <button type="submit">search</button>
+            </form>
+        </div>
+        <div class="chat_list">
+            {% for chat in chat_list %}
+            <form action="/get_messages" method="GET">
+                <button type="submit" name="chat_name" value="{{ chat }}">{{ chat }}</button>
+            </form>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="chat">
+        <div id="chat_header">
+            Chat header
+        </div>
+        <div id="messages_list">
+            {% if current_chat == '' %}
+                <p class="inf_p">Choose chat to start messaging</p>
+            {% elif chat_list[current_chat]|length == 0 %}
+                <p class="inf_p">Here is no messages yet</p>
+            {% elif chat_list[current_chat]|length > 0 %}
+                {% for person, message in chat_list[current_chat] %}
+                    <p class="message">{{ person + ': ' + message }}</p>
+                    <br>
+                {% endfor %}
+            {% endif %}
+        </div>
+        {% if current_chat != '' %}
+        <div class="message_input">
+            <input type="text" name="message" id="message_text">
+            <button id="send_message_btn">send</button>
+            <!-- <form action="/send_message" method="POST">
+                <input type="text" name="message" id="message_text">
+                <button type="submit" id="send_message_btn">send</button>
+            </form> -->
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
