@@ -1,76 +1,109 @@
 window.onload = (event) => {
     initMultiselect();
-  };
-  
-  function initMultiselect() {
+};
+
+function initMultiselect() {
     checkboxStatusChange();
-  
+
     document.addEventListener("click", function(evt) {
-      var flyoutElement = document.getElementById('myMultiselect'),
+    var flyoutElement = document.getElementById('myMultiselect'),
         targetElement = evt.target; // clicked element
-  
-      do {
+
+    do {
         if (targetElement == flyoutElement) {
-          // This is a click inside. Do nothing, just return.
-          //console.log('click inside');
-          return;
+        // This is a click inside. Do nothing, just return.
+        //console.log('click inside');
+        return;
         }
-  
+
         // Go up the DOM
         targetElement = targetElement.parentNode;
-      } while (targetElement);
-  
-      // This is a click outside.
-      toggleCheckboxArea(true);
-      //console.log('click outside');
+    } while (targetElement);
+
+    // This is a click outside.
+    toggleCheckboxArea(true);
+    //console.log('click outside');
     });
-  }
-  
-  function checkboxStatusChange() {
+}
+
+function checkboxStatusChange() {
     var multiselect = document.getElementById("mySelectLabel");
     var multiselectOption = multiselect.getElementsByTagName('option')[0];
-  
+
     var values = [];
     var checkboxes = document.getElementById("mySelectOptions");
     var checkedCheckboxes = checkboxes.querySelectorAll('input[type=checkbox]:checked');
-  
+
     for (const item of checkedCheckboxes) {
-      var checkboxValue = item.getAttribute('value');
-      values.push(checkboxValue);
+    var checkboxValue = item.getAttribute('value');
+    values.push(checkboxValue);
     }
-  
+
     var dropdownValue = "Choose your social circle";
     if (values.length > 0) {
-      dropdownValue = values.join(', ');
+    dropdownValue = values.join(', ');
     }
-  
+
     multiselectOption.innerText = dropdownValue;
-  }
-  
-  function toggleCheckboxArea(onlyHide = false) {
+}
+
+function toggleCheckboxArea(onlyHide = false) {
     var checkboxes = document.getElementById("mySelectOptions");
     var displayValue = checkboxes.style.display;
-  
+
     if (displayValue != "block") {
-      if (onlyHide == false) {
+    if (onlyHide == false) {
         checkboxes.style.display = "block";
-      }
-    } else {
-      checkboxes.style.display = "none";
     }
-  }
-  function handleLoginBtnClick(){
-    var checkboxes = document.getElementById("mySelectOptions");
-    var checkedCheckboxes = checkboxes.querySelectorAll('input[type=checkbox]:checked');
-    console.log(checkedCheckboxes.value);
-    fetch('/login', {
+    } else {
+    checkboxes.style.display = "none";
+    }
+}
+function handleSignupBtnClick(){
+    let checkboxes = document.getElementById("mySelectOptions");
+    let checkedCheckboxes = checkboxes.querySelectorAll('input[type=checkbox]:checked');
+    console.log(checkedCheckboxes);
+    fetch('/sign_up', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({'login': document.getElementById('login').value, 'password': document.getElementById('password').value, 'people': checkedCheckboxes.value})
     })
-  }
+}
 
-  document.addEventListener('DOMContentLoaded', function(){
-    const button = document.querySelector('#login-button');
+function handleLoginBtnClick(){
+    fetch('/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({'login': document.getElementById('login').value, 'password': document.getElementById('password').value})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success){
+            let errorLabel = document.createElement('p');
+            errorLabel.innerHTML = `<p>${data.event}</p>`;
+            document.appendChild(errorLabel);
+        }
+    })
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+    const button = document.getElementById('signup-btn');
+    button.addEventListener('click', function(){
+        fetch('/signup', {
+            method: 'GET'
+        })
+        .then(response => {
+            console.log(response);
+        })
+    })
+});
+
+document.addEventListener('DOMContentLoaded', function(){
+    const button = document.getElementById('login-button');
     button.addEventListener('click', handleLoginBtnClick);
+});
+
+document.addEventListener('DOMContentLoaded', function(){
+    const button = document.getElementById('signup-button');
+    button.addEventListener('click', handleSignupBtnClick);
 });
