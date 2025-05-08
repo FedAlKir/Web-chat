@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 import json
 
 app = Flask('MyChat')
-app.secret_key = ''
+app.secret_key = '685en641e6t51n68e4ty5146etny32t187n32891n5et6'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy(app)
 
@@ -21,22 +21,40 @@ current_chat = ''
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('login.html')
+    return redirect('/login')
 
-@app.route('/signup', methods=['POST'])
-def sign_up():
+@app.route('/login', methods=['GET', 'POST'])
+def log_in():
+    if request.method == 'GET':
+        return render_template('login.html')
     data = json.loads(request.data.decode('utf-8'))
+    print(data)
+    login = data['login']
+    password = data['password']
+    user = User.query.filter_by(login=login).first()
+    if user and user.password == password:
+        session['login'] = login
+        return redirect('/main')
+    session['login'] = login
+    return {'event': 'Login or password is incorrect', 'success': False}
+
+@app.route('/signup', methods=['GET', 'POST'])
+def sign_up():
+    if request.method == 'GET':
+        print('123')
+        return render_template('signup.html')
+    data = json.loads(request.data.decode('utf-8'))
+    print(data)
     login = data['login']
     password = data['password']
     people = data['people']
-    print(f'{login}, {password}, {people}')
-
-@app.route('/login', methods=['POST'])
-def log_in():
-    data = json.loads(request.data.decode('utf-8'))
-    login = data['login']
-    password = data['password']
-
+    user = User.query.filter_by(login=login).first()
+    if user:
+        return {'event': 'User with this login is already exsists', 'success': False}
+    new_user = User(login=login, password=password)
+    db.session.add(new_user)
+    db.session.commit()
+    return redirect('/login')
 
 @app.route('/main', methods=['GET'])
 def get_main_page():
