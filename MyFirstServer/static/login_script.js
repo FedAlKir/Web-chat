@@ -7,22 +7,17 @@ function initMultiselect() {
 
     document.addEventListener("click", function(evt) {
     var flyoutElement = document.getElementById('myMultiselect'),
-        targetElement = evt.target; // clicked element
+        targetElement = evt.target;
 
     do {
         if (targetElement == flyoutElement) {
-        // This is a click inside. Do nothing, just return.
-        //console.log('click inside');
         return;
         }
 
-        // Go up the DOM
         targetElement = targetElement.parentNode;
     } while (targetElement);
 
-    // This is a click outside.
     toggleCheckboxArea(true);
-    //console.log('click outside');
     });
 }
 
@@ -59,14 +54,36 @@ function toggleCheckboxArea(onlyHide = false) {
     checkboxes.style.display = "none";
     }
 }
+
 function handleSignupBtnClick(){
     let checkboxes = document.getElementById("mySelectOptions");
     let checkedCheckboxes = checkboxes.querySelectorAll('input[type=checkbox]:checked');
-    console.log(checkedCheckboxes);
-    fetch('/sign_up', {
+    let people = [];
+    checkedCheckboxes.forEach(checkBox => people.push(checkBox.getAttribute('value')));
+    fetch('/signup', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({'login': document.getElementById('login').value, 'password': document.getElementById('password').value, 'people': checkedCheckboxes.value})
+        body: JSON.stringify({
+            'login': document.getElementById('login').value,
+            'password': document.getElementById('password').value,
+            'username': document.getElementById('username').value,
+            'people': people
+        })
+    })
+    .then(response => {
+        if (response.url == document.URL){
+            return response.json();
+        }
+        else{
+            document.location.replace(response.url);
+        }
+    })
+    .then(data => {
+        if (data.success == false){
+            let errorLabel = document.createElement('p');
+            errorLabel.innerHTML = `<p>${data.message}</p>`;
+            document.body.appendChild(errorLabel);
+        }
     })
 }
 
@@ -74,14 +91,24 @@ function handleLoginBtnClick(){
     fetch('/login', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({'login': document.getElementById('login').value, 'password': document.getElementById('password').value})
+        body: JSON.stringify({
+            'login': document.getElementById('login').value, 
+            'password': document.getElementById('password').value
+        })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (response.url == document.URL){
+            return response.json();
+        }
+        else{
+            document.location.replace(response.url);
+        }
+    })
     .then(data => {
-        if (!data.success){
+        if (data.success == false){
             let errorLabel = document.createElement('p');
-            errorLabel.innerHTML = `<p>${data.event}</p>`;
-            document.appendChild(errorLabel);
+            errorLabel.innerHTML = `<p>${data.message}</p>`;
+            document.body.appendChild(errorLabel);
         }
     })
 }
@@ -93,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function(){
             method: 'GET'
         })
         .then(response => {
-            console.log(response);
+            document.location.replace(response.url);
         })
     })
 });
