@@ -33,6 +33,7 @@ function handleSearchBtnClick(){
 }
 
 function handleCreateChatBtnClick(){
+    console.log('qwerty');
     fetch('/create_chat', {
         method: 'GET'
     })
@@ -42,7 +43,7 @@ function handleCreateChatBtnClick(){
 }
 
 let chatButtons = document.getElementsByClassName('chat_button');
-chatButtons.forEach(function(b){
+for (let b in chatButtons){
     b.addEventListener("click", function(e){
         fetch('/get_messages', {
             method: "POST",
@@ -68,7 +69,7 @@ chatButtons.forEach(function(b){
             }
         })
     })
-})
+}
 
 document.addEventListener('DOMContentLoaded', function(){
     const button = document.querySelector('#send_message_btn');
@@ -81,6 +82,8 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 document.addEventListener('DOMContentLoaded', function(){
-    const button = document.querySelector('#create_new_chat_button');
+    const button = document.getElementById('create_new_chat_button');
     button.addEventListener('click', handleCreateChatBtnClick);
 });
+
+console.log('123123');
