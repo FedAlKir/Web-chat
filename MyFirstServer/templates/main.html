@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <script src="/static/main_script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <link rel="stylesheet" href="/static/main_style.css">
     <meta charset="UTF-8">
     <title>Title</title>
@@ -15,15 +16,16 @@
         </div>
         <div id="chat_list">
             {% for chat_id, chat_name in chat_list %}
-                <button class="chat_button" type="submit" name="chat_name" value="{{ chat_id }}">{{ chat_name }}</button>
+                <button class="chat_button" value="{{ chat_id }}">{{ chat_name }}</button>
             {% endfor %}
         </div>
     </div>
     <div id="chat">
         <div id="chat_header" style="display: none;">
+            <h2 id="chat_name"></h2>
         </div>
         <div id="messages_list">
-            <p class="inf_p">Choose chat to start messaging</p>
+            <p id="inf_p">Choose chat to start messaging</p>
         </div>
         <div id="message_input" style="display: none;">
             <input type="text" name="message" id="message_text">
