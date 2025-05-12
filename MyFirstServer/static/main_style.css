@@ -44,6 +44,7 @@ body{
 
 .message{
     font-size: 20px;
+    margin-bottom: 10px;
 }
 
 #message_input{
@@ -62,4 +63,8 @@ body{
 #message_input button{
     width: 3%;
     height: 25px;
+}
+
+#chat_header{
+    height: 40px;
 }
