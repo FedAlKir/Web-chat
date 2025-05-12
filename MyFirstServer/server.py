@@ -53,7 +53,7 @@ def send_msg(jsn):
         data = json.loads(str(jsn))
         data['sender'] = Users.query.filter_by(id=session['id']).first().username
         room = str(session['current_chat_id'])
-        emit('new_message', str(data), to=room)
+        emit('new_message', data, to=room)
 
 @app.route('/', methods=['GET'])
 def index():
@@ -170,4 +170,9 @@ def create_chat():
         db.session.commit()
         return redirect('/main')
 
-app.run(debug=True, port=5000)
+@app.route('/get_username', methods=['GET'])
+def get_username():
+    return {'username': session['username']}
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
