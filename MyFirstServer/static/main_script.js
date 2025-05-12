@@ -3,14 +3,6 @@ function handleSendBtnClick(){
         method: "POST",
         body: document.querySelector('#message_text').value
     })
-    .then(response => response.json())
-    .then(data => {
-        let messagesList = document.getElementById('messages_list');
-        let newMessage = [data.sender, data.message];
-        let newMessageEl = document.createElement('p');
-        newMessageEl.innerHTML = `<p class="message">${newMessage[0]}: ${newMessage[1]}</p>`;
-        messagesList.appendChild(newMessageEl);
-    })
 }
 
 function handleSearchBtnClick(){
@@ -33,7 +25,6 @@ function handleSearchBtnClick(){
 }
 
 function handleCreateChatBtnClick(){
-    console.log('qwerty');
     fetch('/create_chat', {
         method: 'GET'
     })
@@ -42,38 +33,50 @@ function handleCreateChatBtnClick(){
     })
 }
 
-let chatButtons = document.getElementsByClassName('chat_button');
-for (let b in chatButtons){
-    b.addEventListener("click", function(e){
-        fetch('/get_messages', {
-            method: "POST",
-            body: b.value,
+document.addEventListener('DOMContentLoaded', function(){
+    let chatButtons = document.body.getElementsByClassName('chat_button');
+    let chatButtonsArray = Array.from(chatButtons);
+    chatButtonsArray.forEach(function(b){
+        socket.emit('leave');
+        socket.emit('join', b.value)
+        b.addEventListener("click", function(e){
+            fetch('/get_messages', {
+                method: "POST",
+                body: b.value,
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('chat_header').style.display = 'block';
+                document.getElementById('chat_name').textContent = b.textContent;
+                document.getElementById('chat_header').style.display = 'block';
+                document.getElementById('message_input').style.display = 'block';
+                let messagesList = document.getElementById('messages_list');
+                messagesList.textContent = '';
+                if (data.messages.length > 0){
+                    data.messages.forEach(function(m){
+                        let messageEl = document.createElement('p');
+                        messageEl.innerHTML = `<p class="message">${m[0]}: ${m[1]}<p>`;
+                        messagesList.appendChild(messageEl);
+                    })
+                }
+                else{
+                    let noMessagesEl = document.createElement('p');
+                    noMessagesEl.innerHTML = `<p id="inf_p">Here is no messages yet<p>`;
+                    messagesList.appendChild(noMessagesEl);
+                }
+            })
         })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('chat_header').style.display = 'block';
-            document.getElementById('message_input').style.display = 'block';
-            let messagesList = document.getElementById('messages_list');
-            messagesList.removeChild(messagesList.getElementsByClassName('inf_p'));
-            if (data.messages.length > 0){
-                data.messages.forEach(function(m){
-                    let messageEl = document.createElement('p');
-                    newMessageEl.innerHTML = `<p class="message">${m[0]}: ${m[1]}<p>`;
-                    messagesList.appendChild(messageEl);
-                })
-            }
-            else{
-                let noMessagesEl = document.createElement('p');
-                noMessagesEl.innerHTML = `<p class="inf_p">Here is no messages yet<p>`;
-                messagesList.appendChild(noMessagesEl);
-            }
-        })
-    })
-}
+    });
+});
 
 document.addEventListener('DOMContentLoaded', function(){
     const button = document.querySelector('#send_message_btn');
-    button.addEventListener('click', handleSendBtnClick);
+    button.addEventListener('click', function(){
+        socket.emit('send_new_message', JSON.stringify({
+            'message': document.querySelector('#message_text').value
+        }));
+        handleSendBtnClick();
+    });
 });
 
 document.addEventListener('DOMContentLoaded', function(){
@@ -86,4 +89,16 @@ document.addEventListener('DOMContentLoaded', function(){
     button.addEventListener('click', handleCreateChatBtnClick);
 });
 
-console.log('123123');
+const socket = io();
+
+socket.on('new_message', (data) => {
+    document.querySelector('#message_text').value = '';
+    let messagesList = document.getElementById('messages_list');
+    if (document.getElementsByClassName('message').length == 0){
+        messagesList.textContent = '';
+    }
+    let newMessage = [data.sender, data.message];
+    let newMessageEl = document.createElement('p');
+    newMessageEl.innerHTML = `<p class="message">${newMessage[0]}: ${newMessage[1]}</p>`;
+    messagesList.appendChild(newMessageEl);
+});
