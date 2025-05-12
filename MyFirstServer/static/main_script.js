@@ -92,13 +92,22 @@ document.addEventListener('DOMContentLoaded', function(){
 const socket = io();
 
 socket.on('new_message', (data) => {
-    document.querySelector('#message_text').value = '';
-    let messagesList = document.getElementById('messages_list');
-    if (document.getElementsByClassName('message').length == 0){
-        messagesList.textContent = '';
-    }
-    let newMessage = [data.sender, data.message];
-    let newMessageEl = document.createElement('p');
-    newMessageEl.innerHTML = `<p class="message">${newMessage[0]}: ${newMessage[1]}</p>`;
-    messagesList.appendChild(newMessageEl);
+    fetch('/get_username', {
+        method: 'GET'
+    })
+    .then(responce => responce.json())
+    .then(username => {
+        document.querySelector('#message_text').value = '';
+        let messagesList = document.getElementById('messages_list');
+        if (document.getElementsByClassName('message').length == 0){
+            messagesList.textContent = '';
+        }
+        if (username.username == data.sender){
+            data.sender = 'You';
+        }
+        let newMessage = [data.sender, data.message];
+        let newMessageEl = document.createElement('p');
+        newMessageEl.innerHTML = `<p class="message">${newMessage[0]}: ${newMessage[1]}</p>`;
+        messagesList.appendChild(newMessageEl);
+    })
 });
