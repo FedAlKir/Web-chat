@@ -1,12 +1,14 @@
 from flask import Flask, request, render_template, session
 from werkzeug.utils import redirect
 from flask_sqlalchemy import SQLAlchemy
+from flask_socketio import SocketIO, emit, join_room, leave_room, send
 import json
 
 app = Flask('MyChat')
 app.secret_key = '685en641e6t51n68e4ty5146etny32t187n32891n5et6'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -34,6 +36,24 @@ class Members(db.Model):
 
 with app.app_context():
     db.create_all()
+
+@socketio.on('join')
+def join(data):
+    room = data
+    join_room(room)
+
+@socketio.on('leave')
+def leave():
+    room = str(session['current_chat_id'])
+    leave_room(room)
+
+@socketio.on('send_new_message')
+def send_msg(jsn):
+    if 'id' in session:
+        data = json.loads(str(jsn))
+        data['sender'] = Users.query.filter_by(id=session['id']).first().username
+        room = str(session['current_chat_id'])
+        emit('new_message', str(data), to=room)
 
 @app.route('/', methods=['GET'])
 def index():
