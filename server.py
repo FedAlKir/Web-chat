@@ -3,9 +3,10 @@ from werkzeug.utils import redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO, emit, join_room, leave_room, send
 import json
+import secrets
 
 app = Flask('MyChat')
-app.secret_key = '685en641e6t51n68e4ty5146etny32t187n32891n5et6'
+app.secret_key = secrets.token_hex(16)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -44,16 +45,24 @@ def join(data):
 
 @socketio.on('leave')
 def leave():
-    room = str(session['current_chat_id'])
-    leave_room(room)
+    if 'current_chat_id' in session:
+        room = str(session['current_chat_id'])
+        leave_room(room)
 
 @socketio.on('send_new_message')
 def send_msg(jsn):
+    print(session)
     if 'id' in session:
+        print(session)
         data = json.loads(str(jsn))
         data['sender'] = Users.query.filter_by(id=session['id']).first().username
         room = str(session['current_chat_id'])
         emit('new_message', data, to=room)
+
+@socketio.on('create_new_chat')
+def create_cht():
+    if 'id' in session:
+        print()
 
 @app.route('/', methods=['GET'])
 def index():
@@ -112,6 +121,7 @@ def get_messages():
         return redirect('/')
     chat_id = int(request.data.decode('utf-8'))
     session['current_chat_id'] = chat_id
+    print(session)
     messages = Messages.query.filter_by(chat_id=chat_id)
     message_list = []
     for message in messages:
@@ -119,6 +129,7 @@ def get_messages():
             message_list.append(['You', message.text])
         else:
             message_list.append([Users.query.filter_by(id=message.sender_id).first().username, message.text])
+    print(session)
     return {'messages': message_list}
 
 @app.route('/send_message', methods=['POST'])
@@ -154,7 +165,7 @@ def create_chat():
         people = {}
         users_types = PeopleTypes.query.all()
         for user in users_types:
-            if user.user_id not in people and user.user_id != session['id']:
+            if user.type in types and user.user_id not in people and user.user_id != session['id']:
                 people[user.user_id] = Users.query.filter_by(id=user.user_id).first().username
         return render_template('chat_creator.html', chats=people)
     elif request.method == 'POST':
@@ -175,5 +186,4 @@ def get_username():
     return {'username': session['username']}
 
 if __name__ == '__main__':
-    port = int(os.getenv("PORT", 8080))
-    socketio.run(app, host='0.0.0.0', port=port)
+    app.run(debug=True, port=5000)
