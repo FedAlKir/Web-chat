@@ -55,13 +55,13 @@ function toggleCheckboxArea(onlyHide = false) {
     }
 }
 
-function handleCreateChatBtnClick(){
+async function handleCreateChatBtnClick(){
     let checkboxes = document.getElementById("mySelectOptions");
     let checkedCheckboxes = checkboxes.querySelectorAll('input[type=checkbox]:checked');
     let people = [];
     checkedCheckboxes.forEach(checkBox => people.push(checkBox.getAttribute('value')));
     let id = 0;
-    fetch('/create_chat', {
+    await fetch('/create_chat', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
@@ -89,21 +89,23 @@ function getMainPage(){
 
 document.addEventListener('DOMContentLoaded', function(){
     const button = document.getElementById('create_chat_btn');
-    button.addEventListener('click', function(){
+    button.addEventListener('click', async function(){
         if (document.querySelector('#chat_name').value.length == 0){
             let errorLabel = document.createElement('p');
             errorLabel.innerHTML = `<p>Chat name cannot be empty</p>`;
             document.body.appendChild(errorLabel);
             return;
         }
-        data = handleCreateChatBtnClick();
+        data = await handleCreateChatBtnClick();
         console.log(data);
-        return;
-        socket.emit('create_new_chat', JSON.stringify({
+        let dt = JSON.stringify({
             'chat_name': document.getElementById('chat_name').value,
             'chat_id': data.id,
             'people': data.people
-        }));
+        });
+        console.log(dt);
+        socket.emit('create_new_chat', dt);
+        return;
         getMainPage();
     });
 });
