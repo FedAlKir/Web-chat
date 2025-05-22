@@ -1,27 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <script src="/static/chat_creator_script.js"></script>
     <link rel="stylesheet" href="/static/chat_creator_style.css">
     <meta charset="UTF-8">
-    <title>Title</title>
+    <link rel="stylesheet" href="/static/authorization.css">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>AChat</title>
 </head>
 <body>
-    <input type="text" placeholder="Chat name" id="chat_name">
-    <br>
-    <div id="myMultiselect" class="multiselect">
-      <div id="mySelectLabel" class="selectBox" onclick="toggleCheckboxArea()">
-        <select class="form-select">
-          <option>somevalue</option>
-        </select>
-        <div class="overSelect"></div>
+    <div class="container">
+      <button id="back-button" class="back-button"><img src="../images/left-arrow.svg"></button>
+      <div class="input-group">
+        <img src="/images/profile-icon.svg">
+        <input type="text" placeholder="Chat name" id="chat_name">
       </div>
-      <div id="mySelectOptions">
-        {% for id in chats %}
-            <label for="{{ id }}"><input type="checkbox" id="{{ id }}" onchange="checkboxStatusChange()" value="{{ id }}" /> {{ chats[id] }}</label>
-        {% endfor %}
+      <br>
+      <div id="myMultiselect" class="multiselect">
+        <div id="mySelectLabel" class="selectBox" onclick="toggleCheckboxArea()">
+          <select class="form-select">
+            <option>somevalue</option>
+          </select>
+          <div class="overSelect"></div>
+        </div>
+        <div id="mySelectOptions">
+          {% for id in chats %}
+              <label for="{{ id }}"><input type="checkbox" id="{{ id }}" onchange="checkboxStatusChange()" value="{{ id }}" /> {{ chats[id] }}</label>
+          {% endfor %}
+        </div>
       </div>
+      <br>
+      <button id="create_chat_btn" class="button">Create chat</button>
     </div>
-    <br>
-    <button id="create_chat_btn">Create chat</button>
 </html>
