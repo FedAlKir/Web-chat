@@ -1,19 +1,22 @@
+import flask_socketio
 from flask import Flask, request, render_template, session
 from werkzeug.utils import redirect
 from flask_sqlalchemy import SQLAlchemy
-from flask_socketio import SocketIO, emit, join_room, leave_room, send
+from flask_socketio import SocketIO, emit, join_room, leave_room, send, rooms
 import json
 import secrets
+import os
 
 app = Flask('MyChat')
-app.secret_key = secrets.token_hex(16)
+#app.secret_key = secrets.token_hex(16)
+app.secret_key = '6854ty84n61hn6584kl974m6h51rs354tj89'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    login = db.Column(db.String, unique=True, nullable=False)
+    nickname = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
     username = db.Column(db.String, nullable=False)
 
@@ -49,20 +52,27 @@ def leave():
         room = str(session['current_chat_id'])
         leave_room(room)
 
+@socketio.on('fix_room')
+def fix_room():
+    join_room(f'p{session['id']}')
+
 @socketio.on('send_new_message')
 def send_msg(jsn):
-    print(session)
     if 'id' in session:
-        print(session)
         data = json.loads(str(jsn))
         data['sender'] = Users.query.filter_by(id=session['id']).first().username
         room = str(session['current_chat_id'])
         emit('new_message', data, to=room)
 
 @socketio.on('create_new_chat')
-def create_cht():
+def create_cht(jsn):
     if 'id' in session:
-        print()
+        data = json.loads(jsn)
+        print(data)
+        print('chat created, sending it')
+        for person_id in data['people']:
+            print('sended', person_id)
+            emit('new_chat', data, to=f'p{person_id}')
 
 @app.route('/', methods=['GET'])
 def index():
@@ -73,33 +83,33 @@ def log_in():
     if request.method == 'GET':
         return render_template('login.html')
     data = json.loads(request.data.decode('utf-8'))
-    login = data['login']
+    nickname = data['nickname']
     password = data['password']
-    user = Users.query.filter_by(login=login).first()
+    user = Users.query.filter_by(nickname=nickname).first()
     if user and user.password == password:
         session['username'] = user.username
         session['id'] = user.id
         return redirect('/main')
-    return {'message': 'Login or password is incorrect', 'success': False}
+    return {'message': 'Nickname or password is incorrect', 'success': False}
 
 @app.route('/signup', methods=['GET', 'POST'])
 def sign_up():
     if request.method == 'GET':
         return render_template('signup.html')
     data = json.loads(request.data.decode('utf-8'))
-    login = data['login']
+    nickname = data['nickname']
     password = data['password']
     username = data['username']
     people = data['people']
-    user = Users.query.filter_by(login=login).first()
+    user = Users.query.filter_by(nickname=nickname).first()
     if user:
-        return {'message': 'User with this login is already exsists', 'success': False}
-    new_user = Users(login=login, password=password, username=username)
+        return {'message': 'User with this nickname is already exsists', 'success': False}
+    new_user = Users(nickname=nickname, password=password, username=username)
     db.session.add(new_user)
     db.session.commit()
-    id = Users.query.filter_by(login=login).first().id
+    user_id = Users.query.filter_by(nickname=nickname).first().id
     for p in people:
-        new_people_type = PeopleTypes(user_id=id, type=p)
+        new_people_type = PeopleTypes(user_id=user_id, type=p)
         db.session.add(new_people_type)
     db.session.commit()
     return redirect('/login')
@@ -121,7 +131,6 @@ def get_messages():
         return redirect('/')
     chat_id = int(request.data.decode('utf-8'))
     session['current_chat_id'] = chat_id
-    print(session)
     messages = Messages.query.filter_by(chat_id=chat_id)
     message_list = []
     for message in messages:
@@ -129,7 +138,6 @@ def get_messages():
             message_list.append(['You', message.text])
         else:
             message_list.append([Users.query.filter_by(id=message.sender_id).first().username, message.text])
-    print(session)
     return {'messages': message_list}
 
 @app.route('/send_message', methods=['POST'])
@@ -149,7 +157,7 @@ def search_chat():
     chat_name = request.data.decode('utf-8')
     chats = Members.query.filter_by(member_id=session['id'])
     for chat in chats:
-        if Chats.query.filter_by(id=chat.group_id).name == chat_name:
+        if Chats.query.filter_by(id=chat.group_id).first().name == chat_name:
             return {'id': chat.group_id}
     return {'id': -1}
 
@@ -179,11 +187,24 @@ def create_chat():
             member = Members(member_id=int(p), group_id=new_chat.id)
             db.session.add(member)
         db.session.commit()
-        return redirect('/main')
+        return {'id': new_chat.id}
 
 @app.route('/get_username', methods=['GET'])
 def get_username():
     return {'username': session['username']}
 
+@app.route('/add_person', methods=['POST'])
+def add_person():
+    if 'id' in session:
+        redirect('/')
+    data = request.data.decode('utf-8')
+    user = Users.query.filter_by(nickname=data).first()
+    member = Members(member_id=user.id, group_id=session['current_chat_id'])
+    db.session.add(member)
+    db.session.commit()
+    chat_name = Chats.query.filter_by(id=session['current_chat_id']).first().name
+    return {'chatName': chat_name, 'id': session['current_chat_id'], 'personId': user.id}
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.getenv("PORT", 8080))
+    socketio.run(app, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
