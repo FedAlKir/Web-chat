@@ -1,18 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <script src="/static/login_script.js"></script>
     <link rel="stylesheet" href="/static/login_style.css">
+    <link rel="stylesheet" href="/static/authorization.css">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>AChat</title>
 </head>
 <body>
-    <h1>Log in</h1>
-    <input type="text" id="login" placeholder="Login">
-    <br>
-    <input type="password" id="password" placeholder="Password">
-    <br>
-    <button id="login-button">Log in</button>
-    <button id="signup-btn">Sign up</button>
+    <div class="container">
+        <h1 class="heading">Log in</h1>
+        <div class="input-group">
+            <img src="/images/login-icon.svg">
+            <input type="text" id="nickname" placeholder="Nickname">
+        </div>
+        <br>
+        <div class="input-group">
+            <img src="/images/password-icon.svg">
+            <input type="password" id="password" placeholder="Password">
+        </div>
+        <br>
+        <button id="login-button" class="button">Log in</button>
+        <br>
+        <button id="signup-btn" class="button">Sign up</button>
+    </div>
 </body>
 </html>
