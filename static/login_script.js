@@ -56,6 +56,14 @@ function toggleCheckboxArea(onlyHide = false) {
 }
 
 function handleSignupBtnClick(){
+    if (document.getElementById('nickname').value.length == 0 || 
+        document.getElementById('password').value.length == 0 || 
+        document.getElementById('username').value.length == 0){
+            let errorLabel = document.createElement('p');
+            errorLabel.innerHTML = `<p>Nickname or password or username cannot be empty</p>`;
+            document.body.appendChild(errorLabel);
+            return;
+    }
     let checkboxes = document.getElementById("mySelectOptions");
     let checkedCheckboxes = checkboxes.querySelectorAll('input[type=checkbox]:checked');
     let people = [];
@@ -64,7 +72,7 @@ function handleSignupBtnClick(){
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-            'login': document.getElementById('login').value,
+            'nickname': document.getElementById('nickname').value,
             'password': document.getElementById('password').value,
             'username': document.getElementById('username').value,
             'people': people
@@ -88,11 +96,18 @@ function handleSignupBtnClick(){
 }
 
 function handleLoginBtnClick(){
+    if (document.getElementById('nickname').value.length == 0 || 
+        document.getElementById('password').value.length == 0){
+            let errorLabel = document.createElement('p');
+            errorLabel.innerHTML = `<p>Nickname or password cannot be empty</p>`;
+            document.body.appendChild(errorLabel);
+            return;
+    }
     fetch('/login', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-            'login': document.getElementById('login').value, 
+            'nickname': document.getElementById('nickname').value, 
             'password': document.getElementById('password').value
         })
     })
@@ -101,6 +116,7 @@ function handleLoginBtnClick(){
             return response.json();
         }
         else{
+            socket.emit('fix_room');
             document.location.replace(response.url);
         }
     })
@@ -134,3 +150,17 @@ document.addEventListener('DOMContentLoaded', function(){
     const button = document.getElementById('signup-button');
     button.addEventListener('click', handleSignupBtnClick);
 });
+
+document.addEventListener('DOMContentLoaded', function(){
+    const button = document.getElementById('back-button');
+    button.addEventListener('click', function(){
+        fetch('/', {
+            method: 'GET'
+        })
+        .then(response => {
+            document.location.replace(response.url);
+        })
+    });
+});
+
+const socket = io();
