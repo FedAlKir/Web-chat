@@ -5,30 +5,37 @@
     <script src="/static/main_script.js"></script>
     <link rel="stylesheet" href="/static/main_style.css">
     <meta charset="UTF-8">
-    <title>Title</title>
+    <link rel="stylesheet" href="/static/authorization.css">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>AChat</title>
 </head>
 <body>
     <div id="chat_list_div">
         <div id="search_chat">
             <input id="search_input" type="text" name="chat_name">
             <button id="search_button">search</button>
-            <button id="create_new_chat_button">create new chat</button>
+            <br>
+            <button id="create_new_chat_button" class="button">create new chat</button>
         </div>
         <div id="chat_list">
             {% for chat_id, chat_name in chat_list %}
-                <button class="chat_button" value="{{ chat_id }}">{{ chat_name }}</button>
+                <button class="chat_button" id="{{ chat_id }}" value="{{ chat_id }}">{{ chat_name }}</button>
             {% endfor %}
         </div>
     </div>
     <div id="chat">
         <div id="chat_header" style="display: none;">
             <h2 id="chat_name"></h2>
+            <div id="add_person_div">
+                <input type="text" id="add_person_input" placeholder="Nickname">
+                <button id="add_person_button">Add</button>
+            </div>
         </div>
         <div id="messages_list">
             <p id="inf_p">Choose chat to start messaging</p>
         </div>
         <div id="message_input" style="display: none;">
-            <input type="text" name="message" id="message_text">
+            <input type="text" id="message_text">
             <button id="send_message_btn">send</button>
         </div>
     </div>
