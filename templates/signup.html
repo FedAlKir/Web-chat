@@ -4,15 +4,28 @@
     <script src="/static/login_script.js"></script>
     <link rel="stylesheet" href="/static/login_style.css">
     <meta charset="UTF-8">
-    <title>Title</title>
+    <link rel="stylesheet" href="/static/authorization.css">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>AChat</title>
 </head>
 <body>
-    <h1>Sign up</h1>
-    <input type="text" id="login" placeholder="Login">
+  <div class="container">
+    <button id="back-button" class="back-button"><img src="../images/left-arrow.svg"></button>
+    <h1 class="heading">Sign up</h1>
+    <div class="input-group">
+        <img src="/images/login-icon.svg">
+        <input type="text" id="nickname" placeholder="Nickname">
+    </div>
     <br>
-    <input type="password" id="password" placeholder="Password">
+    <div class="input-group">
+        <img src="/images/password-icon.svg">
+        <input type="password" id="password" placeholder="Password">
+    </div>
     <br>
-    <input type="text" id="username" placeholder="Username">
+    <div class="input-group">
+        <img src="/images/key-icon.svg">
+        <input type="text" id="username" placeholder="Username">
+    </div>
     <br>
     <div id="myMultiselect" class="multiselect">
       <div id="mySelectLabel" class="selectBox" onclick="toggleCheckboxArea()">
@@ -28,6 +41,7 @@
         <label for="four"><input type="checkbox" id="four" onchange="checkboxStatusChange()" value="graduate" /> Graduate</label>
       </div>
     </div>
-    <button id="signup-button">Sign Up</button>
+    <button id="signup-button" class="button">Sign Up</button>
+  </div>
 </body>
 </html>
