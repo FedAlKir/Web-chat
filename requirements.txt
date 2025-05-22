@@ -1,3 +1,6 @@
-flask
-flask_sqlalchemy
-flask_socketio
+flask==2.1.2
+flask_sqlalchemy==2.5.1
+sqlalchemy==1.4.49
+flask_socketio==5.3.4
+python-socketio==5.8.0
+python-engineio==4.4.0
