@@ -34,7 +34,7 @@ function checkboxStatusChange() {
     values.push(document.querySelectorAll(`label[for="${labelId}"]`)[0].textContent);
     }
 
-    var dropdownValue = "Choose your social circle";
+    var dropdownValue = "Choose members";
     if (values.length > 0) {
     dropdownValue = values.join(', ');
     }
@@ -72,7 +72,6 @@ async function handleCreateChatBtnClick(){
     .then(response => response.json())
     .then(data => {
         id = data.id;
-        console.log(id);
     })
     return JSON.stringify({
         'id': id,
@@ -96,17 +95,26 @@ document.addEventListener('DOMContentLoaded', function(){
             document.body.appendChild(errorLabel);
             return;
         }
-        data = await handleCreateChatBtnClick();
-        console.log(data);
+        data = JSON.parse(await handleCreateChatBtnClick());
         let dt = JSON.stringify({
             'chat_name': document.getElementById('chat_name').value,
             'chat_id': data.id,
             'people': data.people
         });
-        console.log(dt);
         socket.emit('create_new_chat', dt);
-        return;
         getMainPage();
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function(){
+    const button = document.getElementById('back-button');
+    button.addEventListener('click', function(){
+        fetch('/main', {
+            method: 'GET'
+        })
+        .then(response => {
+            document.location.replace(response.url);
+        })
     });
 });
 
